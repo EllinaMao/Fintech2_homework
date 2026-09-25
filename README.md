@@ -1,13 +1,21 @@
-# Sample Hardhat Project
+# homework
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
 
-Try running some of the following tasks:
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.js
-```
+// Функціонал реалізувати у контракті. Фронтенд має викликати ці функції
+ 
+// Product:
+// - назва продукту
+// - опис
+// - ціна
+// - адреса акаунта(хто створив)
+// - часова мітка створення
+// - URL-картинка
+ 
+// фронтенд:
+// можливість створити новий продукт
+// вивести продукти у вигляді таблиці: 
+// Назва/Опис/АдресаАкаунта/ДатаСтворення/Картинка(Відобразити)
+
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/d9ff96c5-833f-4ff7-806a-44978245c7ea" />
