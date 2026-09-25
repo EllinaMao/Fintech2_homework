@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conter App</title>
+</head>
+<body>
+    <h1>Storage</h1>
+    <p>User: <span id="name">?</span> <span id="age">?</span></p>
+    <p>Current value: <span id="value">?</span></p>
+    <input type="number" id="set_value" placeholder="Enter new value">
+    <button id="set_value" onclick="set_value()">Set Value</button>
+
+    
+    <script src="counter_abi.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.17.0/ethers.umd.min.js"></script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.ethereum){
+                provider_error();
+                return;
+
+                if (setValueButton) {
+                    setValueButton.addEventListener("click", provider_error);
+                    return;
+                }
+                
+            }
+            get_value();
+            get_user();
+
+            const setValueButton = document.getElementById("set_value");
+            setValueButton.addEventListener("click", set_value);
+            
+        });
+
+        const provider_error = () => {
+            alert("Please install web3 provider (e.g., MetaMask)!");
+        };
+        const contract_address = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+        // const abi = [
+        //     "function get_value() external view returns (uint)",
+        //     "function set_value(uint _value) external",
+        //     "function get_user() external pure returns (User memory)"
+        // ];
+
+        
+        const get_value = async () => {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const contract = new ethers.Contract(contract_address, abi, provider);
+
+            const value = await contract.get_value();
+            document.getElementById("value").textContent = value;
+        };
+        const get_user = async () => {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const contract = new ethers.Contract(contract_address, abi, provider);
+
+            const user = await contract.get_user();
+            document.getElementById("name").textContent = user.name;
+            document.getElementById("age").textContent = user.age;
+        };
+
+        const set_value = async () => {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            await provider.send("eth_requestAccounts",[]);
+            const signer = await provider.getSigner();
+
+            const contract = new ethers.Contract(contract_address, abi, signer);
+            const new_value = parseInt(document.getElementById("set_value").value);
+
+            const tx = await contract.set_value(new_value);
+            await tx.wait();
+            await get_value();
+
+        };
+        
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product App</title>
+</head>
+<body>
+    <header>
+        <h1>Products</h1>
+    </header>
+    <main> 
+    <div id="products_list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Creator</th>
+                    <th>Timestamp</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody id="products_table_body">
+        </table>
+        <button onclick="show_add_form()">Add Product</button>
+    </div>
+    <div id="add_product_form" style="display:none;">
+        <h2>Add Product</h2>
+        <label for="product_name">Name:</label>
+        <input type="text" id="product_name" />
+        <br/>
+        <label for="product_description">Description:</label>
+        <input type="text" id="product_description" />
+        <br/>
+        <label for="product_price">Price:</label>
+        <input type="text" id="product_price" />
+        <br/>
+        <label for="product_imageUrl">Image URL:</label>
+        <input type="text" id="product_imageUrl" />
+        <br/>
+        <button onclick="add_product()">Add</button>
+        <button onclick="clean_and_hide_add_form()">Cancel</button>
+    </div>
+    </main>
+    
+    <script src="product_abi.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.17.0/ethers.umd.min.js"></script>
+    <script>
+        const contract_address = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"; 
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (!window.ethereum){
+                provider_error();
+                return;         
+            }
+            await get_products();
+        });
+
+        const provider_error = () => {
+            alert("Please install web3 provider (e.g., MetaMask)!");
+        };
+
+        const get_products = async () => {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const contract = new ethers.Contract(contract_address, abi, provider);
+            const products = await contract.get_products();
+
+            const products_table_body = document.getElementById("products_table_body");
+            products_table_body.innerHTML = "";
+
+            products.forEach((product) => {
+                const timestampMs = Number(product.timestamp) * 1000;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.description}</td>
+                    <td>${product.price}</td>
+                    <td>${product.creator}</td>
+                    <td>${new Date(timestampMs).toLocaleString()}</td>
+                    <td><img src="${product.imageUrl}" alt="${product.name}" width="100"/></td>
+                `;
+                products_table_body.appendChild(row);
+            });
+        };
+
+        const show_add_form = () => {
+            document.getElementById("add_product_form").style.display = "block";
+        };
+        
+        const add_product = async () => {
+            const name = document.getElementById("product_name").value;
+            const description = document.getElementById("product_description").value;
+            const price = document.getElementById("product_price").value;
+            const imageUrl = document.getElementById("product_imageUrl").value;
+
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(contract_address, abi, signer);
+            const tx = await contract.add_product(name, description, price, imageUrl);
+            await tx.wait();
+
+            clean_and_hide_add_form();
+            
+            await get_products();
+        };
+
+        const clean_and_hide_add_form = () => {
+            document.getElementById("product_name").value = "";
+            document.getElementById("product_description").value = "";
+            document.getElementById("product_price").value = "";
+            document.getElementById("product_imageUrl").value = "";
+            document.getElementById("add_product_form").style.display = "none";
+        };
+    </script>
+</body>
+</html>
